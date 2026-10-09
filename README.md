@@ -89,7 +89,7 @@ Balanced mode (Haiku scan, Sonnet 5 curator), with a hard per-job cap (`MAX_JOB_
 ## Landing page
 
 `site/index.html` is the project's landing page, a single static file with no build step. Every push to `main` that touches
-`site/` deploys it to GitHub Pages through `.github/workflows/pages.yml`, at https://kavan0910.github.io/ClipForge/.
+`site/` deploys it to GitHub Pages through `.github/workflows/pages.yml`, at https://kavan0910.github.io/ClipForge.github.io/.
 
 One-time setup: in the repo on GitHub, open Settings → Pages and set **Source** to **GitHub Actions**. To use a custom domain,
 enter it under Settings → Pages → Custom domain and add the DNS record GitHub shows you.
