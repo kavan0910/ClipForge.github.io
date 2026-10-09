@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clipforge</title>
+<meta name="description" content="Local-first AI clipping studio: one long video in, ready-to-post vertical shorts out. Your video never leaves your Mac; Claude picks the moments from the transcript.">
+<meta property="og:title" content="Clipforge">
+<meta property="og:description" content="One long video in, ready-to-post vertical shorts out. Local-first, with Claude as the editor.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233f7f72'/%3E%3Crect x='7' y='9' width='18' height='3' rx='1.5' fill='%23fff' opacity='.55'/%3E%3Crect x='12' y='9' width='5' height='3' rx='1.5' fill='%23fff'/%3E%3Crect x='11' y='15' width='7' height='11' rx='2' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --surface-2: #e8eeec;
+  --text: #1d2a2c;
+  --muted: #5b6d70;
+  --line: #d5dfdc;
+  --accent: #3f7f72;
+  --accent-soft: #d6e8e3;
+  --accent-ink: #ffffff;
+  --warn: #8a5a12;
+  --warn-soft: #f6ead3;
+  --display: "Bricolage Grotesque", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1417;
+    --surface: #182025;
+    --surface-2: #1f292f;
+    --text: #e4ebee;
+    --muted: #92a2a9;
+    --line: #2a363d;
+    --accent: #86bfb0;
+    --accent-soft: #1d3530;
+    --accent-ink: #0d1a17;
+    --warn: #e6bf7a;
+    --warn-soft: #33291a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1417;
+  --surface: #182025;
+  --surface-2: #1f292f;
+  --text: #e4ebee;
+  --muted: #92a2a9;
+  --line: #2a363d;
+  --accent: #86bfb0;
+  --accent-soft: #1d3530;
+  --accent-ink: #0d1a17;
+  --warn: #e6bf7a;
+  --warn-soft: #33291a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 16px/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code, pre { font-family: var(--mono); font-size: 0.875rem; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+/* Nav */
+nav { border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 700 1.125rem var(--display); color: var(--text); text-decoration: none; }
+.brand svg { width: 26px; height: 26px; }
+.nav-links { display: flex; gap: 20px; font-size: 0.9375rem; }
+.nav-links a { color: var(--muted); text-decoration: none; }
+.nav-links a:hover { color: var(--text); }
+@media (max-width: 560px) { .nav-links .hide-sm { display: none; } }
+
+/* Hero */
+.hero { padding: 72px 0 56px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 0.8125rem var(--mono); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px;
+}
+.eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+h1 {
+  font: 700 clamp(2.4rem, 7vw, 4.4rem)/1.02 var(--display);
+  letter-spacing: -0.03em;
+  margin: 20px 0 20px;
+  max-width: 14ch;
+}
+h1 em { font-style: normal; color: var(--accent); }
+.lede { font-size: 1.1875rem; color: var(--muted); max-width: 56ch; margin: 0 0 32px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px; border-radius: 10px;
+  font: 600 0.9375rem var(--body); text-decoration: none;
+  border: 1px solid var(--line); color: var(--text); background: var(--surface);
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:hover { text-decoration: none; filter: brightness(1.05); }
+
+/* Hero diagram: long timeline -> vertical clips */
+.diagram { margin-top: 56px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+.diagram-label { font: 500 0.75rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.timeline { position: relative; height: 44px; background: var(--surface-2); border-radius: 8px; overflow: hidden; }
+.timeline .wave { position: absolute; inset: 0; display: flex; align-items: center; gap: 2px; padding: 0 6px; }
+.timeline .wave i { flex: 1; background: var(--line); border-radius: 1px; }
+.timeline .pick { position: absolute; top: 0; bottom: 0; background: var(--accent); opacity: 0.85; border-radius: 4px; }
+.timeline .pick span { position: absolute; top: -1px; left: 6px; font: 500 0.6875rem/44px var(--mono); color: var(--accent-ink); }
+.arrow { display: flex; justify-content: center; padding: 14px 0; color: var(--muted); }
+.clips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.clip {
+  aspect-ratio: 9 / 16; border-radius: 12px; position: relative; overflow: hidden;
+  background: linear-gradient(170deg, var(--surface-2), var(--accent-soft));
+  border: 1px solid var(--line);
+}
+.clip .hook { position: absolute; top: 9%; left: 8%; right: 8%; font: 700 clamp(0.6rem, 1.6vw, 0.875rem)/1.2 var(--display); }
+.clip .face { position: absolute; left: 50%; top: 40%; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: var(--line); }
+.clip .cap { position: absolute; bottom: 16%; left: 8%; right: 8%; text-align: center; font: 700 clamp(0.55rem, 1.4vw, 0.8125rem)/1.3 var(--body); }
+.clip .cap b { background: var(--accent); color: var(--accent-ink); padding: 0 3px; border-radius: 3px; }
+.clip .tag { position: absolute; bottom: 5%; left: 8%; font: 500 0.625rem var(--mono); color: var(--muted); }
+@media (max-width: 560px) {
+  .clips { grid-template-columns: repeat(2, 1fr); }
+  .clip:nth-child(n+3) { display: none; }
+  .timeline .pick span { display: none; }
+}
+
+/* Sections */
+section { padding: 72px 0; border-top: 1px solid var(--line); }
+h2 { font: 700 clamp(1.75rem, 4vw, 2.5rem)/1.1 var(--display); letter-spacing: -0.02em; margin: 0 0 12px; }
+.section-lede { color: var(--muted); max-width: 60ch; margin: 0 0 40px; font-size: 1.0625rem; }
+h3 { font: 700 1.125rem/1.3 var(--display); margin: 0 0 8px; }
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: step; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+.step::before { counter-increment: step; content: "0" counter(step); display: block; font: 500 0.8125rem var(--mono); color: var(--accent); margin-bottom: 14px; }
+.step p { margin: 0; color: var(--muted); font-size: 0.9375rem; }
+.step .where { display: inline-block; margin-top: 14px; font: 500 0.6875rem var(--mono); padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.step .where.api { background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .steps { grid-template-columns: 1fr; } }
+
+/* Features */
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 32px; }
+.feature p { margin: 0; color: var(--muted); font-size: 0.9375rem; }
+.feature svg { width: 22px; height: 22px; color: var(--accent); margin-bottom: 10px; }
+@media (max-width: 900px) { .features { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+
+/* Split */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+@media (max-width: 800px) { .split { grid-template-columns: 1fr; gap: 28px; } }
+.split p { color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+.panel ul { list-style: none; margin: 0; padding: 0; }
+.panel li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+.panel li:last-child { border-bottom: 0; }
+.panel li .k { flex: 0 0 112px; font: 500 0.75rem/1.9 var(--mono); color: var(--muted); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.dot.local { background: var(--muted); }
+.dot.api { background: var(--accent); }
+
+/* Numbers */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.stat .v { font: 700 2rem/1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat .l { margin-top: 8px; font-size: 0.875rem; color: var(--muted); }
+@media (max-width: 800px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 0.75rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+tr:last-child td { border-bottom: 0; }
+td:last-child { font-variant-numeric: tabular-nums; }
+.note { font-size: 0.875rem; color: var(--muted); margin-top: 14px; }
+.miss { color: var(--warn); font-weight: 600; }
+
+/* Status */
+.status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .status-grid { grid-template-columns: 1fr; } }
+.status-grid ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.9375rem; }
+.status-grid li { margin: 6px 0; }
+.panel.warn { background: var(--warn-soft); border-color: transparent; }
+.panel.warn h3 { color: var(--warn); }
+
+/* Install */
+pre {
+  margin: 0; padding: 20px; overflow-x: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; line-height: 1.75;
+}
+pre .c { color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 0.875rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+footer p { margin: 0; max-width: 60ch; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .timeline .pick { animation: glow 3.2s ease-in-out infinite; }
+  .timeline .pick:nth-of-type(3) { animation-delay: .5s; }
+  .timeline .pick:nth-of-type(4) { animation-delay: 1s; }
+  .timeline .pick:nth-of-type(5) { animation-delay: 1.5s; }
+  @keyframes glow { 0%, 100% { opacity: .85; } 50% { opacity: .55; } }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><rect x="7" y="9" width="18" height="3" rx="1.5" fill="var(--accent-ink)" opacity=".5"/><rect x="12" y="9" width="5" height="3" rx="1.5" fill="var(--accent-ink)"/><rect x="11" y="15" width="7" height="11" rx="2" fill="var(--accent-ink)"/></svg>
+      Clipforge
+    </a>
+    <div class="nav-links">
+      <a class="hide-sm" href="#how">How it works</a>
+      <a class="hide-sm" href="#numbers">Numbers</a>
+      <a href="https://github.com/kavan0910/ClipForge">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">In active development · macOS, Apple Silicon</span>
+    <h1>One long video in. <em>Ready-to-post shorts</em> out.</h1>
+    <p class="lede">Clipforge is a local-first AI clipping studio. It transcribes, reframes, captions and renders on your Mac. Claude reads the transcript and picks the moments worth posting. Your video file never leaves your machine.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/kavan0910/ClipForge">View the source on GitHub</a>
+      <a class="btn" href="#how">See how it works</a>
+    </div>
+
+    <div class="diagram" role="img" aria-label="Diagram: a long video timeline with four highlighted moments, each becoming a vertical 9:16 clip with a hook and word-by-word captions.">
+      <div class="diagram-label">Source · 33:42 podcast episode</div>
+      <div class="timeline">
+        <div class="wave" id="wave"></div>
+        <div class="pick" style="left:9%;width:5%"><span>c001</span></div>
+        <div class="pick" style="left:31%;width:4%"><span>c002</span></div>
+        <div class="pick" style="left:58%;width:6%"><span>c003</span></div>
+        <div class="pick" style="left:82%;width:4.5%"><span>c004</span></div>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3v14M4 11l6 6 6-6"/></svg></div>
+      <div class="clips">
+        <div class="clip"><div class="hook">Nobody tells you this about launching</div><div class="face"></div><div class="cap">and that's when <b>everything</b> changed</div><div class="tag">0:41 · 1080×1920</div></div>
+        <div class="clip"><div class="hook">The one metric we ignored</div><div class="face"></div><div class="cap">we were <b>measuring</b> the wrong thing</div><div class="tag">0:33 · 1080×1920</div></div>
+        <div class="clip"><div class="hook">Why we rewrote it twice</div><div class="face"></div><div class="cap">the second time it <b>actually</b> worked</div><div class="tag">0:52 · 1080×1920</div></div>
+        <div class="clip"><div class="hook">Advice I'd give my past self</div><div class="face"></div><div class="cap">just <b>ship</b> the ugly version</div><div class="tag">0:38 · 1080×1920</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="section-lede">Paste a link or drop a file. Each step after that runs on your machine except one: the editorial pass, which sends transcript text to Claude.</p>
+    <div class="steps">
+      <div class="step">
+        <h3>Ingest</h3>
+        <p>Any yt-dlp link or a local file, validated with ffprobe. Rotation, variable frame rate and multiple audio tracks are handled.</p>
+        <span class="where">on your Mac</span>
+      </div>
+      <div class="step">
+        <h3>Listen and look</h3>
+        <p>Word-level Whisper transcription, speaker detection, energy, laughter, shot changes, motion and platform heatmaps.</p>
+        <span class="where">on your Mac</span>
+      </div>
+      <div class="step">
+        <h3>Curate</h3>
+        <p>A cheap Claude scan finds candidates, then a stronger Claude model picks and ranks clips. Boundaries snap to word and sentence edges.</p>
+        <span class="where api">Claude API · text only</span>
+      </div>
+      <div class="step">
+        <h3>Render</h3>
+        <p>Speaker-aware 9:16 reframing, designer captions, filler cleanup and -14 LUFS audio, all in one H.264 encode.</p>
+        <span class="where">on your Mac</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What's built today</h2>
+    <p class="section-lede">Six build phases are complete, covered by 236 backend tests plus web unit and Playwright suites.</p>
+    <div class="features">
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <h3>Speaker-aware reframing</h3>
+        <p>Single, two-shot, stacked, screen-plus-cam and blurred-fit layouts. The face stays in the crop in over 98.5% of frames.</p>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 17h16M4 12h10"/><rect x="15" y="10" width="5" height="4" rx="1"/></svg>
+        <h3>Designer captions</h3>
+        <p>Eight templates with word-by-word highlight, hook overlays and brand kits. Rendered by Remotion, with a libass fallback.</p>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h3"/><path d="m14 15 2 2 3-4"/></svg>
+        <h3>Text-based editing</h3>
+        <p>Select words in the transcript to cut them. Drag to trim, restore fillers, and switch templates live. Fully keyboard-driven.</p>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6"/><rect x="13" y="12" width="8" height="8" rx="1.5"/><path d="m16 15 2 1.5-2 1.5z" fill="currentColor"/></svg>
+        <h3>Character-edit mode</h3>
+        <p>Name a character in an episode or film. Claude checks small shot thumbnails to find their scenes, then Clipforge cuts a graded montage.</p>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>
+        <h3>Publish or package</h3>
+        <p>Upload to YouTube with scheduling, or get a ready-to-post folder with copy for Shorts, Reels and TikTok.</p>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h9"/></svg>
+        <h3>Pro exports</h3>
+        <p>OpenTimelineIO, FCPXML, FCP7 XML and CMX 3600 EDL, so you can finish a cut in your NLE of choice.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <div>
+      <h2>How Claude is used</h2>
+      <p>The model does the editorial judgement: reading a transcript the way an editor would, finding the opening that hooks and the payoff that lands, and ranking candidates. Clipforge then snaps every cut to exact word boundaries, so the model never decides frame timing.</p>
+      <p>Curation runs in two stages. Claude Haiku does a cheap scan and a stronger Claude model makes the final picks. A live cost meter and a hard per-job cap (default $1) mean a long video can't run up a surprise bill.</p>
+      <p>The clip score is labelled a heuristic. It's not a virality prediction, and the UI says so.</p>
+    </div>
+    <div class="panel">
+      <h3>What leaves your machine</h3>
+      <ul>
+        <li><span class="k"><span class="dot local"></span>Video file</span><span>Never. Decoding, reframing and encoding are all local.</span></li>
+        <li><span class="k"><span class="dot local"></span>Audio</span><span>Never. Transcription runs locally with Whisper.</span></li>
+        <li><span class="k"><span class="dot api"></span>Transcript</span><span>Text and light metadata go to the Claude API for curation.</span></li>
+        <li><span class="k"><span class="dot api"></span>Thumbnails</span><span>Character-edit mode only: small still frames, so Claude can tell who is on screen.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="numbers">
+  <div class="wrap">
+    <h2>Measured, not promised</h2>
+    <p class="section-lede">These numbers come from the project's own test runs, recorded in the build checkpoints. Every timing was measured on an M1 with 16 GB, so newer Macs should be faster.</p>
+    <div class="stats">
+      <div class="stat"><div class="v">~$0.11</div><div class="l">API cost per hour of video (Balanced mode)</div></div>
+      <div class="stat"><div class="v">0</div><div class="l">mid-word cuts across 14 real clips</div></div>
+      <div class="stat"><div class="v">≥98.5%</div><div class="l">frames with the face inside the crop</div></div>
+      <div class="stat"><div class="v">−14 LUFS</div><div class="l">loudness target, met on every clip</div></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Curation cost, 33.7-minute video</td><td>$0.063</td></tr>
+          <tr><td>Render time, 60 s clip (libx264 slow, CRF 17)</td><td>about 88 s</td></tr>
+          <tr><td>Render time, 27.8 s clip with Remotion captions</td><td>46 s</td></tr>
+          <tr><td>A/V drift</td><td>≤ 0.5 frame</td></tr>
+          <tr><td>True peak</td><td>≤ −2.4 dBTP</td></tr>
+          <tr><td>In-app preview vs. exported file</td><td>0.0000 pixel mismatch</td></tr>
+          <tr><td>Word onsets within ±50 ms</td><td><span class="miss">27%, target not met</span></td></tr>
+          <tr><td>Top-3 recall against hand-labelled best clips</td><td>0.37 → 0.45 after clip selection v3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Recall labels are hand-made and subjective. Word-onset accuracy is partly offset by acoustic snapping and a short caption lead.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Where it stands</h2>
+    <p class="section-lede">Clipforge is early: a working studio built by one developer, run locally. Here's what's next and what isn't proven yet.</p>
+    <div class="status-grid">
+      <div class="panel">
+        <h3>Next up</h3>
+        <ul>
+          <li>Live-test YouTube upload with a real OAuth client, then pass Google's audit so public uploads stick</li>
+          <li>Better word-onset accuracy with a per-language CTC aligner</li>
+          <li>Verify active-speaker detection on real multi-speaker footage</li>
+          <li>Speech enhancement for poor audio</li>
+          <li>Validate character-edit mode end to end on full-length episodes</li>
+        </ul>
+      </div>
+      <div class="panel warn">
+        <h3>Known gaps</h3>
+        <ul>
+          <li>Speaker diarization needs you to accept the pyannote model terms on Hugging Face</li>
+          <li>YouTube upload has only been tested against a protocol-level mock</li>
+          <li>Instagram and TikTok have no upload API a local app can use, so posting there is manual via the ready-made package</li>
+          <li>macOS on Apple Silicon is the target. Other platforms are untested.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap split">
+    <div>
+      <h2>Try it</h2>
+      <p>On a Mac, double-click <code>install_and_run.command</code> in the repo. It installs the dependencies, asks for your Anthropic API key and opens the app on <code>localhost</code>. The manual steps are on the right.</p>
+      <p>Only process videos you own or have permission to reuse.</p>
+    </div>
+<pre><span class="c"># clone and set up</span>
+git clone https://github.com/kavan0910/ClipForge
+cd ClipForge
+make setup
+cp .env.example .env   <span class="c"># add ANTHROPIC_API_KEY</span>
+make doctor
+make start             <span class="c"># http://127.0.0.1:8765</span>
+
+<span class="c"># or from the CLI</span>
+clipforge run &lt;url|path&gt; --clips 8 --duration 30-60</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Clipforge · a local-first clipping studio, built with Claude.</p>
+    <!-- TODO: add your contact address once your domain email is set up, e.g. <a href="mailto:hello@yourdomain">hello@yourdomain</a> -->
+    <a href="https://github.com/kavan0910/ClipForge">github.com/kavan0910/ClipForge</a>
+  </div>
+</footer>
+
+<script>
+  // Decorative waveform bars for the hero timeline.
+  (function () {
+    var wave = document.getElementById('wave');
+    if (!wave) return;
+    var n = window.innerWidth < 560 ? 60 : 120;
+    for (var i = 0; i < n; i++) {
+      var b = document.createElement('i');
+      var h = 20 + Math.abs(Math.sin(i * 0.37) * 45 + Math.sin(i * 1.3) * 25);
+      b.style.height = Math.min(h, 90) + '%';
+      wave.appendChild(b);
+    }
+  })();
+</script>
+</body>
+</html>
