@@ -86,6 +86,14 @@ small teams; larger companies need a licence (`captions/README.md`).
 Curation is the only step that calls the API (transcript text only). Measured from the API `usage` fields: about $0.11 per hour of video in
 Balanced mode (Haiku scan, Sonnet 5 curator), with a hard per-job cap (`MAX_JOB_COST_USD`, default $1). Everything else runs on your machine.
 
+## Landing page
+
+`site/index.html` is the project's landing page, a single static file with no build step. Every push to `main` that touches
+`site/` deploys it to GitHub Pages through `.github/workflows/pages.yml`, at https://kavan0910.github.io/ClipForge/.
+
+One-time setup: in the repo on GitHub, open Settings → Pages and set **Source** to **GitHub Actions**. To use a custom domain,
+enter it under Settings → Pages → Custom domain and add the DNS record GitHub shows you.
+
 ## Licences and terms
 
 - Remotion (captions) is free for individuals and small companies; larger for-profit companies need
